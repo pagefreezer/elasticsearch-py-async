@@ -1,3 +1,4 @@
+import gzip
 import asyncio
 import ssl
 import warnings
@@ -16,7 +17,7 @@ class AIOHttpConnection(Connection):
     def __init__(self, host='localhost', port=9200, http_auth=None,
             use_ssl=False, verify_certs=False, ca_certs=None, client_cert=None,
             client_key=None, loop=None, use_dns_cache=True, headers=None,
-            ssl_context=None, **kwargs):
+            ssl_context=None, http_compress=False, **kwargs):
         super().__init__(host=host, port=port, **kwargs)
 
         self.loop = asyncio.get_event_loop() if loop is None else loop
@@ -28,8 +29,11 @@ class AIOHttpConnection(Connection):
             if isinstance(http_auth, (tuple, list)):
                 http_auth = aiohttp.BasicAuth(*http_auth)
 
+        self.http_compress = http_compress
         headers = headers or {}
         headers.setdefault('content-type', 'application/json')
+        if self.http_compress:
+            headers.update({'content-encoding': 'gzip', 'accept-encoding': 'gzip,deflate'})
 
         # if providing an SSL context, raise error if any other SSL related flag is used
         if ssl_context and (verify_certs or ca_certs):
@@ -90,6 +94,9 @@ class AIOHttpConnection(Connection):
         if params:
             url_path = '%s?%s' % (url, urlencode(params or {}))
         url = self.base_url + url_path
+
+        if self.http_compress and body:
+            body = gzip.compress(body)
 
         start = self.loop.time()
         response = None
