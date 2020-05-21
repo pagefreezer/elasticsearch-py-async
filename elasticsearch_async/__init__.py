@@ -1,6 +1,6 @@
 import asyncio
 
-from elasticsearch import Elasticsearch
+from elasticsearch6 import Elasticsearch
 
 from .connection import AIOHttpConnection
 from .transport import AsyncTransport
