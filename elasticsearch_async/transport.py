@@ -3,8 +3,8 @@ import time
 import logging
 from itertools import chain
 
-from elasticsearch import Transport, TransportError, ConnectionTimeout, ConnectionError, SerializationError
-from elasticsearch.connection_pool import DummyConnectionPool
+from elasticsearch6 import Transport, TransportError, ConnectionTimeout, ConnectionError, SerializationError
+from elasticsearch6.connection_pool import DummyConnectionPool
 
 from .connection import AIOHttpConnection
 from .connection_pool import AsyncConnectionPool, AsyncDummyConnectionPool
