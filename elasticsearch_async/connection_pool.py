@@ -1,6 +1,6 @@
 import asyncio
 
-from elasticsearch.connection_pool import ConnectionPool, DummyConnectionPool
+from elasticsearch6.connection_pool import ConnectionPool, DummyConnectionPool
 
 
 class AsyncConnectionPool(ConnectionPool):
