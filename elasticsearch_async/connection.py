@@ -88,8 +88,7 @@ class AIOHttpConnection(Connection):
     def close(self):
         yield from self.session.close()
 
-    @asyncio.coroutine
-    def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=(), headers=None):
+    async def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=(), headers=None):
         url_path = url
         if params:
             url_path = '%s?%s' % (url, urlencode(params or {}))
@@ -101,9 +100,9 @@ class AIOHttpConnection(Connection):
         start = self.loop.time()
         response = None
         try:
-            with async_timeout.timeout(timeout or self.timeout, loop=self.loop):
-                response = yield from self.session.request(method, url, data=body, headers=headers)
-                raw_data = yield from response.text()
+            async with async_timeout.timeout(timeout or self.timeout):
+                response = await self.session.request(method, url, data=body, headers=headers)
+                raw_data = await response.text()
             duration = self.loop.time() - start
 
         except asyncio.CancelledError:
@@ -119,7 +118,7 @@ class AIOHttpConnection(Connection):
 
         finally:
             if response is not None:
-                yield from response.release()
+                await response.release()
 
         # raise errors based on http status codes, let the client handle those if needed
         if not (200 <= response.status < 300) and response.status not in ignore:
